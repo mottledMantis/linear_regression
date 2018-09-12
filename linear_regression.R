@@ -130,12 +130,44 @@ coef(summary(sat.voting.mod))
 ##   per capita (energy) from the percentage of residents living in
 ##   metropolitan areas (metro). Be sure to
 ##   1. Examine/plot the data before fitting the model
+sts.energy <- subset(states.data, select = c("energy", "metro"))
+sts.energy$energy <- as.numeric(sts.energy.sat$energy)
+summary(sts.energy)
+cor(sts.energy, use = "complete.obs")
+plot(sts.energy)
+
+my.energy.model = lm(energy ~ metro, data = states.data)
 ##   2. Print and interpret the model `summary'
+summary(my.energy.model)
+
 ##   3. `plot' the model to look for deviations from modeling assumptions
+par(mar = c(4, 4, 2, 2), mfrow = c(1, 2))
+plot(my.sat.model, which = c(1, 2))
+
+###MY CONCLUSION ON ENERGY ~ METRO:
+###RESIDUALS ARE ALL OVER THE PLACE, SO FAILS THE ASSUMPTION OF HOMOSCHEDASTICITY
 
 ##   Select one or more additional predictors to add to your model and
 ##   repeat steps 1-3. Is this model significantly better than the model
 ##   with /metro/ as the only predictor?
+
+##LET'S TRY ANOTHER - I WONDER WHETHER TOXIC, WASTE, GREEN ARE PREDICTORS
+sts.energy2 <- subset(states.data, select = c("energy", "toxic", "green"))
+sts.energy2$energy <- as.numeric(sts.energy.sat$energy)
+summary(sts.energy2)
+cor(sts.energy2, use = "complete.obs")
+plot(sts.energy2)
+
+my.energy.model2 = lm(energy ~ toxic + green, data = states.data)
+##   2. Print and interpret the model `summary'
+summary(my.energy.model2)
+
+##   3. `plot' the model to look for deviations from modeling assumptions
+par(mar = c(4, 4, 2, 2), mfrow = c(1, 2))
+plot(my.energy.model2, which = c(1, 2))
+
+## SEEMS NORMALLY DISTRIBUTED, median residuals are better and R-sqaured score is significantly improved
+
 
 ## Interactions and factors
 ## ══════════════════════════
@@ -197,9 +229,35 @@ coef(summary(lm(csat ~ C(region, contr.helmert),
 ## ────────────────────────────────────────
 
 ##   Use the states data set.
+states.data <- readRDS("dataSets/states.rds") 
+states.info <- data.frame(attributes(states.data)[c("names", "var.labels")])
 
 ##   1. Add on to the regression equation that you created in exercise 1 by
 ##      generating an interaction term and testing the interaction.
+sts.energy3 <- subset(states.data, select = c("energy", "toxic", "green"))
+sts.energy3$energy <- as.numeric(sts.energy.sat$energy)
+summary(sts.energy3)
+cor(sts.energy3, use = "complete.obs")
+plot(sts.energy3)
+
+my.energy.model3 = lm(energy ~ toxic + green + toxic * green, data = states.data)
+##   2. Print and interpret the model `summary'
+summary(my.energy.model3)
+
+##   3. `plot' the model to look for deviations from modeling assumptions
+par(mar = c(4, 4, 2, 2), mfrow = c(1, 2))
+plot(my.energy.model3, which = c(1, 2))
+
+anova(my.energy.model2, my.energy.model3)
+coef(summary(my.energy.model2))
+coef(summary(my.energy.model3))
+
 
 ##   2. Try adding region to the model. Are there significant differences
 ##      across the four regions?
+sts.energy4 <- subset(states.data, select = c("energy", "toxic", "green", "region"))
+plot(sts.energy4)
+my.energy.model4 = lm(energy ~ toxic + green + + region + toxic * green, data = states.data)
+##   2. Print and interpret the model `summary'
+summary(my.energy.model4)
+## yes, region does seems to affect the model
